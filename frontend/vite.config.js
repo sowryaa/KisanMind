@@ -6,5 +6,6 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    allowedHosts: ['kisanmind-production-5483.up.railway.app'],
   },
 });
