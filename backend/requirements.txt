@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+anthropic
+google-generativeai
+google-genai
+httpx
+python-dotenv
+pydantic
+supabase
+google-auth
+python-jose[cryptography]
+google-api-python-client
+duckduckgo_search
