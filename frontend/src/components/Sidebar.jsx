@@ -1,11 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles,
-  MessageSquare, BarChart2, Menu, X,
+  MessageSquare, BarChart2, Menu, X, Search,
 } from 'lucide-react';
 import { translate } from '../lib/translate';
 
 const LIMIT_DAY = 1400;
+
+const ALL_DISTRICTS = [
+  'Anantapur','Alluri Sitharama Raju','Anakapalli','Bapatla','Chittoor',
+  'East Godavari','Eluru','Guntur','Kadapa','Konaseema','Krishna','Kurnool',
+  'Manyam','Nandyal','Nellore','NTR','Palnadu','Prakasam','Srikakulam',
+  'Sri Balaji','Sri Potti Sriramulu Nellore','Sri Sathya Sai','Tirupati',
+  'Visakhapatnam','Vizianagaram','West Godavari',
+];
+
+function DistrictSelector({ district, onChangeDistrict }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = ALL_DISTRICTS.filter(d => d.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full bg-zinc-900/80 border border-white/5 text-sm p-2.5 rounded-xl outline-none text-gray-200 cursor-pointer flex items-center justify-between"
+      >
+        <span>{district}</span>
+        <span className="text-gray-500 text-xs">▼</span>
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden">
+          <div className="p-2 border-b border-white/5 flex items-center gap-2">
+            <Search size={13} className="text-gray-400" />
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search district..."
+              className="bg-transparent text-sm text-gray-200 outline-none w-full placeholder-gray-500"
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-gray-500 p-3">No districts found</p>
+            ) : filtered.map(d => (
+              <button
+                key={d}
+                onClick={() => { onChangeDistrict(d); setOpen(false); setSearch(''); }}
+                className={`w-full text-left text-sm px-3 py-2 transition-colors ${
+                  d === district ? 'bg-green-500/10 text-green-400' : 'text-gray-300 hover:bg-zinc-800'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Sidebar({
   user,
@@ -28,11 +91,7 @@ export default function Sidebar({
 
   const SidebarContent = () => (
     <aside className="w-72 h-full bg-[#121212]/98 border-r border-white/5 flex flex-col justify-between glass">
-
-      {/* Top */}
       <div className="p-4 flex flex-col gap-3.5 overflow-y-auto flex-1">
-
-        {/* Brand + New chat */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🌾</span>
@@ -41,24 +100,15 @@ export default function Sidebar({
             </h1>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={onNewChat}
-              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-gray-200 transition-colors"
-              title="New Chat"
-            >
+            <button onClick={onNewChat} className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-gray-200 transition-colors" title="New Chat">
               <Sparkles size={15} />
             </button>
-            {/* Close button on mobile */}
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-gray-200 transition-colors md:hidden"
-            >
+            <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-gray-200 transition-colors md:hidden">
               <X size={15} />
             </button>
           </div>
         </div>
 
-        {/* Daily usage bar */}
         <div className="bg-zinc-900/60 rounded-xl p-3 border border-white/5">
           <div className="flex items-center justify-between mb-1.5 text-xs">
             <div className="flex items-center gap-1.5 text-gray-400">
@@ -77,18 +127,13 @@ export default function Sidebar({
               style={{ width: `${usagePercent}%` }}
             />
           </div>
-          <p className="text-[10px] text-gray-500 mt-1">
-            {LIMIT_DAY - usedToday} requests remaining
-          </p>
+          <p className="text-[10px] text-gray-500 mt-1">{LIMIT_DAY - usedToday} requests remaining</p>
         </div>
 
-        {/* Incognito toggle */}
         <button
           onClick={onToggleIncognito}
           className={`flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition-all duration-300 ${
-            incognito
-              ? 'bg-red-500/10 border-red-500/30 text-red-400'
-              : 'bg-zinc-900 border-white/5 text-gray-300 hover:bg-zinc-850'
+            incognito ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-zinc-900 border-white/5 text-gray-300 hover:bg-zinc-850'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -100,21 +145,11 @@ export default function Sidebar({
           </div>
         </button>
 
-        {/* District selector */}
         <div className="flex flex-col gap-1">
           <label className="text-xs text-gray-400 ml-1">District</label>
-          <select
-            value={district}
-            onChange={(e) => onChangeDistrict(e.target.value)}
-            className="w-full bg-zinc-900/80 border border-white/5 text-sm p-2.5 rounded-xl outline-none text-gray-200 cursor-pointer"
-          >
-            {['Kurnool','Guntur','Nellore','Krishna','Visakhapatnam','Chittoor','Kadapa','Anantapur','Srikakulam','West Godavari','East Godavari','Prakasam','Vizianagaram','Sri Potti Sriramulu Nellore','Bapatla','Eluru','NTR','Palnadu','Tirupati','Sri Sathya Sai','Alluri Sitharama Raju','Anakapalli','Konaseema','Manyam','Nandyal','Sri Balaji'].map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
+          <DistrictSelector district={district} onChangeDistrict={onChangeDistrict} />
         </div>
 
-        {/* Quick tools */}
         <div className="flex flex-col gap-2">
           <button onClick={onShowWeather} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
             <CloudSun size={17} className="text-yellow-500" />
@@ -126,7 +161,6 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Chat history */}
         <div>
           <p className="text-[10px] font-semibold text-gray-500 mb-2 px-1 tracking-widest uppercase">Recent Chats</p>
           <div className="flex flex-col gap-1 max-h-52 overflow-y-auto">
@@ -152,7 +186,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Bottom profile */}
       <div className="p-4 border-t border-white/5 bg-zinc-900/20">
         {user ? (
           <div className="flex items-center justify-between gap-2">
@@ -179,30 +212,18 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop sidebar */}
       <div className="hidden md:flex h-full">
         <SidebarContent />
       </div>
-
-      {/* Mobile hamburger button */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-50 p-2 rounded-xl bg-zinc-900 border border-white/10 text-gray-300 shadow-lg"
-      >
+      <button onClick={() => setMobileOpen(true)} className="md:hidden fixed top-3 left-3 z-50 p-2 rounded-xl bg-zinc-900 border border-white/10 text-gray-300 shadow-lg">
         <Menu size={18} />
       </button>
-
-      {/* Mobile drawer overlay */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="flex h-full">
             <SidebarContent />
           </div>
-          {/* Backdrop */}
-          <div
-            className="flex-1 bg-black/50 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
+          <div className="flex-1 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
         </div>
       )}
     </>
