@@ -108,7 +108,7 @@ export default function Sidebar({
             onChange={(e) => onChangeDistrict(e.target.value)}
             className="w-full bg-zinc-900/80 border border-white/5 text-sm p-2.5 rounded-xl outline-none text-gray-200 cursor-pointer"
           >
-            {['Kurnool','Guntur','Nellore','Krishna','Visakhapatnam','Chittoor','Kadapa','Anantapur','Srikakulam','West Godavari','East Godavari','Prakasam'].map(d => (
+            {['Kurnool','Guntur','Nellore','Krishna','Visakhapatnam','Chittoor','Kadapa','Anantapur','Srikakulam','West Godavari','East Godavari','Prakasam','Vizianagaram','Sri Potti Sriramulu Nellore','Bapatla','Eluru','NTR','Palnadu','Tirupati','Sri Sathya Sai','Alluri Sitharama Raju','Anakapalli','Konaseema','Manyam','Nandyal','Sri Balaji'].map(d => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
