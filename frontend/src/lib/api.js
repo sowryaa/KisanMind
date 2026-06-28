@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = 'https://kisanmind-production.up.railway.app';
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -41,7 +41,6 @@ export const authGoogle = async (token) => {
 
 export const getOfflineData = async (type) => {
   try {
-    // Falls back to service worker routing offline
     const response = await fetch(`/api/offline/${type}`);
     return await response.json();
   } catch (error) {
