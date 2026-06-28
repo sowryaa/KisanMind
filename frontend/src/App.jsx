@@ -389,17 +389,23 @@ export default function App() {
             <h3 className="text-xl font-bold text-gray-100 mb-4">🌾 Mandi Prices (APMC)</h3>
             {priceInfo.loading ? (
               <p className="text-sm text-gray-400">Loading prices...</p>
-            ) : priceInfo.prices ? (
-              <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
-                {Object.entries(priceInfo.prices).map(([name, detail]) => (
-                  <div key={name} className="bg-zinc-800/40 p-3.5 rounded-xl border border-white/5 flex flex-col text-sm capitalize">
-                    <span className="font-bold text-gray-200">{name}</span>
-                    <span className="text-xs text-gray-400">Market: {detail.market}</span>
-                    <span className="font-semibold text-farmGreen mt-1">₹{detail.price} / {detail.unit}</span>
+            ) : priceInfo.records && priceInfo.records.length > 0 ? (
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
+                <p className="text-xs text-gray-500 mb-1">{priceInfo.source === "live" ? "🟢 Live data" : "🟡 Cached data"} — {priceInfo.district}</p>
+                {priceInfo.records.map((r, i) => (
+                  <div key={i} className="bg-zinc-800/40 p-3.5 rounded-xl border border-white/5 flex justify-between items-center text-sm">
+                    <div>
+                      <span className="font-bold text-gray-200">{r.commodity}</span>
+                      <p className="text-xs text-gray-400">{r.market} · {r.arrival_date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-farmGreen">₹{r.modal_price}/q</p>
+                      <p className="text-xs text-gray-500">₹{r.min_price}–₹{r.max_price}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : <p className="text-sm text-red-400">Error loading prices.</p>}
+            ) : <p className="text-sm text-red-400">No price data available for this district.</p>}
           </div>
         </div>
       )}
