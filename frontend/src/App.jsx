@@ -61,7 +61,7 @@ export default function App() {
   const isOffline = useOffline();
   const { isStreaming, startStream, stopStream } = useStream();
 
-  const { startListening, stopListening, speak, stopSpeaking, isSpeaking } = useVoice({
+  const { isListening, startListening, stopListening, speak, stopSpeaking, isSpeaking } = useVoice({
     language,
     onTranscript: (transcript) => {
       setInputValue(transcript);
@@ -348,6 +348,9 @@ export default function App() {
         isOpen={isVoiceOpen}
         onClose={() => { setIsVoiceOpen(false); stopListening(); }}
         language={language}
+        isListening={isListening}
+        onStart={startListening}
+        onStop={stopListening}
       />
 
       {/* Weather overlay */}
