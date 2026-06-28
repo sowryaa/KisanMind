@@ -4,8 +4,10 @@ import { translate } from '../lib/translate';
 
 export default function VoiceModal({ isOpen, onClose, language = 'te', isListening, onStart, onStop }) {
   useEffect(() => {
-    if (isOpen) onStart?.();
-    return () => onStop?.();
+    if (isOpen) {
+      const timer = setTimeout(() => onStart?.(), 300);
+      return () => { clearTimeout(timer); };
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
