@@ -1,21 +1,11 @@
 import { useState, useRef } from 'react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = 'https://kisanmind-production.up.railway.app';
 
 export function useStream() {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortControllerRef = useRef(null);
 
-  /**
-   * startStream — SSE streaming with sources + rate-limit support
-   *
-   * Callbacks:
-   *   onChunk(text)              — called for each text chunk
-   *   onSources(sources[])      — called once when sources arrive
-   *   onRateLimit(info)         — called if 429 response received
-   *   onDone()                  — called when stream completes
-   *   onError(err)              — called on network/other errors
-   */
   const startStream = async ({
     messages,
     language,
@@ -40,7 +30,6 @@ export function useStream() {
         signal: abortControllerRef.current.signal,
       });
 
-      // ── Rate limit response (JSON 429) ──────────────────────────────────
       if (response.status === 429) {
         const info = await response.json();
         if (onRateLimit) onRateLimit(info);
@@ -52,7 +41,6 @@ export function useStream() {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      // ── SSE stream ───────────────────────────────────────────────────────
       const reader  = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer    = '';
@@ -63,7 +51,7 @@ export function useStream() {
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
-        buffer = lines.pop(); // keep last partial line
+        buffer = lines.pop();
 
         for (const line of lines) {
           const clean = line.trim();
@@ -77,7 +65,6 @@ export function useStream() {
 
           try {
             const parsed = JSON.parse(dataStr);
-
             if (parsed.sources && onSources) {
               onSources(parsed.sources);
             } else if (parsed.text && onChunk) {
