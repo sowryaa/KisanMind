@@ -10,6 +10,34 @@ import logging
 
 logger = logging.getLogger("uvicorn.error")
 
+AP_DISTRICT_SOIL = {
+    "kurnool":       {"phh2o": 7.8, "nitrogen": 0.8, "soc": 0.4, "clay": 38, "sand": 32, "silt": 30},
+    "guntur":        {"phh2o": 7.2, "nitrogen": 0.9, "soc": 0.5, "clay": 30, "sand": 40, "silt": 30},
+    "nellore":       {"phh2o": 6.8, "nitrogen": 0.7, "soc": 0.4, "clay": 25, "sand": 50, "silt": 25},
+    "krishna":       {"phh2o": 7.0, "nitrogen": 1.1, "soc": 0.7, "clay": 28, "sand": 42, "silt": 30},
+    "visakhapatnam": {"phh2o": 6.5, "nitrogen": 0.9, "soc": 0.6, "clay": 22, "sand": 55, "silt": 23},
+    "chittoor":      {"phh2o": 6.2, "nitrogen": 0.8, "soc": 0.5, "clay": 20, "sand": 58, "silt": 22},
+    "kadapa":        {"phh2o": 7.5, "nitrogen": 0.7, "soc": 0.4, "clay": 35, "sand": 35, "silt": 30},
+    "anantapur":     {"phh2o": 7.6, "nitrogen": 0.6, "soc": 0.3, "clay": 32, "sand": 38, "silt": 30},
+    "srikakulam":    {"phh2o": 6.0, "nitrogen": 0.8, "soc": 0.5, "clay": 20, "sand": 60, "silt": 20},
+    "west godavari": {"phh2o": 6.8, "nitrogen": 1.2, "soc": 0.8, "clay": 30, "sand": 40, "silt": 30},
+    "east godavari": {"phh2o": 6.9, "nitrogen": 1.1, "soc": 0.7, "clay": 28, "sand": 42, "silt": 30},
+    "prakasam":      {"phh2o": 7.4, "nitrogen": 0.7, "soc": 0.4, "clay": 33, "sand": 36, "silt": 31},
+    "vizianagaram":  {"phh2o": 6.3, "nitrogen": 0.8, "soc": 0.5, "clay": 22, "sand": 56, "silt": 22},
+    "bapatla":       {"phh2o": 7.1, "nitrogen": 1.0, "soc": 0.6, "clay": 29, "sand": 41, "silt": 30},
+    "eluru":         {"phh2o": 6.9, "nitrogen": 1.1, "soc": 0.7, "clay": 28, "sand": 43, "silt": 29},
+    "nandyal":       {"phh2o": 7.7, "nitrogen": 0.7, "soc": 0.3, "clay": 36, "sand": 33, "silt": 31},
+    "tirupati":      {"phh2o": 6.4, "nitrogen": 0.8, "soc": 0.5, "clay": 21, "sand": 57, "silt": 22},
+    "palnadu":       {"phh2o": 7.3, "nitrogen": 0.8, "soc": 0.4, "clay": 34, "sand": 35, "silt": 31},
+}
+
+def get_district_soil_fallback(place: str) -> dict:
+    place_lower = place.lower()
+    for district, data in AP_DISTRICT_SOIL.items():
+        if district in place_lower or place_lower in district:
+            return data
+    return None
+
 async def get_coordinates(place: str) -> dict:
     """Convert place name to lat/lon using Open-Meteo geocoding (free)."""
     try:
