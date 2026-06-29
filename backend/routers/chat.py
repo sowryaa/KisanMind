@@ -188,3 +188,67 @@ Be practical and specific to Indian farming conditions."""
     except Exception as e:
         logger.error(f"Image analysis error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+class SoilAnalysisRequest(BaseModel):
+    image_base64: str
+    language: str = "te"
+    user_id: Optional[str] = None
+
+@router.post("/analyze-soil")
+async def analyze_soil(req: SoilAnalysisRequest, request: Request):
+    """Analyze soil test report image and give fertilizer recommendations."""
+    import base64
+
+    user_id = req.user_id or request.client.host or "anon"
+    limit = check_rate_limit(user_id)
+    if not limit["allowed"]:
+        return JSONResponse(status_code=429, content={"error": "rate_limited"})
+
+    lang_instruction = {
+        "te": "Respond ONLY in Telugu.",
+        "hi": "Respond ONLY in Hindi.",
+        "en": "Respond in English.",
+    }.get(req.language, "Respond in English.")
+
+    prompt = f"""You are KisanMind, an expert soil scientist and farming advisor for Indian farmers.
+A farmer has shared their soil test report. Analyze it carefully and provide:
+
+1. **మట్టి స్థితి సారాంశం** (Soil Health Summary): Overall soil health status
+2. **పోషక విశ్లేషణ** (Nutrient Analysis): 
+   - నత్రజని (Nitrogen/N): Level and interpretation
+   - భాస్వరం (Phosphorus/P): Level and interpretation  
+   - పొటాష్ (Potassium/K): Level and interpretation
+   - pH విలువ: Acidic/Neutral/Alkaline and implications
+   - సేంద్రియ కర్బనం (Organic Carbon): Level
+3. **ఎరువుల సిఫార్సు** (Fertilizer Recommendations): 
+   - Specific fertilizers with exact quantities per acre
+   - When and how to apply
+4. **సరైన పంటలు** (Suitable Crops): Which crops grow best in this soil
+5. **మట్టి మెరుగుదల** (Soil Improvement Tips): How to improve soil health
+
+{lang_instruction}
+Be specific with quantities in kg/acre. Consider Indian farming conditions and locally available fertilizers."""
+
+    gemini_key, account_num = key_manager.get_gemini_key()
+    if not gemini_key:
+        return JSONResponse(status_code=503, content={"error": "Service busy"})
+
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=gemini_key)
+        image_bytes = base64.b64decode(req.image_base64)
+
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                types.Part.from_text(text=prompt),
+            ],
+        )
+        return {"analysis": response.text, "status": "success"}
+    except Exception as e:
+        logger.error(f"Soil analysis error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
