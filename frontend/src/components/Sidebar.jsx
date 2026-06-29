@@ -3,7 +3,7 @@ import { MapPin,
   User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles,
   MessageSquare, BarChart2, Menu, X, Search,
 } from 'lucide-react';
-import { MapPin, translate } from '../lib/translate';
+import { translate } from '../lib/translate';
 
 const LIMIT_DAY = 1400;
 
