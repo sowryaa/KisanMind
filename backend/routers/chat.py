@@ -126,3 +126,62 @@ async def chat_incognito(req: ChatRequest, request: Request):
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+class ImageAnalysisRequest(BaseModel):
+    image_base64: str
+    language: str = "te"
+    user_id: Optional[str] = None
+
+@router.post("/analyze-image")
+async def analyze_image(req: ImageAnalysisRequest, request: Request):
+    """Analyze crop image for diseases, pests, nutrient deficiencies."""
+    from pydantic import BaseModel
+    from typing import Optional
+    import base64
+
+    user_id = req.user_id or request.client.host or "anon"
+    limit = check_rate_limit(user_id)
+    if not limit["allowed"]:
+        return JSONResponse(status_code=429, content={"error": "rate_limited"})
+
+    lang_instruction = {
+        "te": "Respond ONLY in Telugu.",
+        "hi": "Respond ONLY in Hindi.",
+        "en": "Respond in English.",
+    }.get(req.language, "Respond in English.")
+
+    prompt = f"""You are KisanMind, an expert AI farming assistant for Indian farmers.
+A farmer has shared a photo of their crop. Analyze this image carefully and provide:
+
+1. **వ్యాధి/తెగులు గుర్తింపు** (Disease/Pest Identification): What disease, pest, or deficiency do you see?
+2. **లక్షణాలు** (Symptoms): Describe what you observe in the image
+3. **కారణాలు** (Causes): What causes this problem?
+4. **పరిష్కారాలు** (Solutions): Specific treatments and remedies
+5. **నివారణ** (Prevention): How to prevent this in future
+
+{lang_instruction}
+Be practical and specific to Indian farming conditions."""
+
+    gemini_key, account_num = key_manager.get_gemini_key()
+    if not gemini_key:
+        return JSONResponse(status_code=503, content={"error": "Service busy"})
+
+    try:
+        from google import genai
+        from google.genai import types
+
+        client = genai.Client(api_key=gemini_key)
+        image_bytes = base64.b64decode(req.image_base64)
+
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                types.Part.from_text(text=prompt),
+            ],
+        )
+        return {"analysis": response.text, "status": "success"}
+    except Exception as e:
+        logger.error(f"Image analysis error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
