@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi.responses import StreamingResponse, JSONResponse
 from services.claude_service import stream_chat
 from services.rate_limiter import check_rate_limit
+from services.key_manager import key_manager
 from services.weather_service import get_weather
 from models.chat import ChatRequest
 import json
