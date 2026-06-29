@@ -294,6 +294,22 @@ export default function App() {
   // ── Weather / Prices ─────────────────────────────────────────────────────
   const handleShowWeather = async () => { setWeatherInfo({ loading: true }); setWeatherInfo(await getWeather(district)); };
 
+  const handleSoilUpload = async (base64) => {
+    setMessages(prev => [...prev, { role: "user", content: "🧪 మట్టి పరీక్షా నివేదికను విశ్లేషణ కోసం పంపాను" }]);
+    setMessages(prev => [...prev, { role: "assistant", content: "🔬 మీ మట్టి నివేదికను విశ్లేషిస్తున్నాను..." }]);
+    try {
+      const res = await fetch("https://kisanmind-production.up.railway.app/api/chat/analyze-soil", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_base64: base64, language, user_id: user?.google_id }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: data.analysis || "విశ్లేషణ విఫలమైంది." }]);
+    } catch (err) {
+      setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: "మట్టి నివేదిక విశ్లేషించడంలో సమస్య." }]);
+    }
+  };
+
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) return alert("Geolocation not supported");
     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -322,6 +338,7 @@ export default function App() {
         onSelectConversation={(id) => { setCurrentConversationId(id); loadMessages(id); }}
         onNewChat={() => { setCurrentConversationId(null); setMessages([]); }}
         onShowWeather={handleShowWeather}
+        onShowSoilAnalysis={() => document.getElementById("soil-upload").click()}
         onUseMyLocation={handleUseMyLocation}
         onShowPrices={handleShowPrices}
         language={language}

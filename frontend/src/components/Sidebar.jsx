@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin,
-  User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles,
+  User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles, FlaskConical,
   MessageSquare, BarChart2, Menu, X, Search,
 } from 'lucide-react';
 import { translate } from '../lib/translate';
@@ -83,6 +83,7 @@ export default function Sidebar({
   onNewChat,
   onShowWeather,
   onShowPrices,
+  onShowSoilAnalysis,
   onUseMyLocation,
   language = 'te',
   usedToday = 0,
@@ -158,6 +159,10 @@ export default function Sidebar({
           <button onClick={onShowWeather} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
             <CloudSun size={17} className="text-yellow-500" />
             <span className="text-sm">{translate('weather', language)}</span>
+          </button>
+          <button onClick={onShowSoilAnalysis} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
+            <FlaskConical size={17} className="text-orange-400" />
+            <span className="text-sm">Soil Analysis</span>
           </button>
           <button onClick={onShowPrices} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
             <IndianRupee size={17} className="text-green-500" />
