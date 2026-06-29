@@ -107,12 +107,12 @@ async def stream_chat(messages: list, language: str = "en", weather_context: str
             yield _localize(_BOTH_BUSY_MSGS, language)
             return
 
-        logger.info("🤖 [attempt %d] gemini-1.5-flash via Account %d", attempt + 1, account_num)
+        logger.info("🤖 [attempt %d] gemini-2.5-flash via Account %d", attempt + 1, account_num)
 
         try:
             client = genai.Client(api_key=gemini_key)
             response_stream = await client.aio.models.generate_content_stream(
-                model="gemini-1.5-flash",
+                model="gemini-2.5-flash",
                 contents=gemini_contents,
                 config=config,
             )

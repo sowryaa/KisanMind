@@ -178,7 +178,7 @@ Be practical and specific to Indian farming conditions."""
         image_bytes = base64.b64decode(req.image_base64)
 
         response = await client.aio.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             contents=[
                 types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
                 types.Part.from_text(text=prompt),
