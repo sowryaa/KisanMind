@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = 'https://kisanmind-production.up.railway.app';
+const BACKEND_URL = 'http://127.0.0.1:8000';
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -26,6 +26,20 @@ export const getPrices = async (commodity = '', district = '') => {
   } catch (error) {
     console.error('Error fetching mandi prices:', error);
     return { error: 'Failed to fetch price data' };
+  }
+};
+
+export const calculateLogistics = async (payload) => {
+  try {
+    const response = await api.post('/api/logistics/calculate', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating logistics:', error);
+    return {
+      error:
+        error?.response?.data?.detail ||
+        'Failed to calculate logistics data',
+    };
   }
 };
 

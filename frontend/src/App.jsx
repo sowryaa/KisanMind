@@ -10,7 +10,7 @@ import { useStream } from './hooks/useStream';
 import FarmProfile from "./components/FarmProfile";
 import { useOffline } from './hooks/useOffline';
 import { supabase } from './lib/supabase';
-import { getWeather, getPrices } from './lib/api';
+import { getWeather, getPrices, calculateLogistics } from './lib/api';
 import { Wifi, X } from 'lucide-react';
 
 // ── Rate limit localStorage keys ─────────────────────────────────────────────
@@ -172,6 +172,65 @@ export default function App() {
     }
   };
 
+  const parseLogisticsCommand = (text) => {
+    if (!text.toLowerCase().startsWith('/logistics ')) return null;
+
+    const raw = text.slice(11).trim();
+    const parts = raw.split('|').map(p => p.trim());
+
+    if (parts.length < 6) return { error: 'Use: /logistics crop | source | destination | quantityKg | sourcePrice | destinationPrice | optionalToll' };
+
+    const [
+      crop_name,
+      source_market,
+      destination_market,
+      quantity_kg,
+      source_price_per_kg,
+      destination_price_per_kg,
+      toll_tax
+    ] = parts;
+
+    return {
+      crop_name,
+      source_market,
+      destination_market,
+      quantity_kg: Number(quantity_kg),
+      source_price_per_kg: Number(source_price_per_kg),
+      destination_price_per_kg: Number(destination_price_per_kg),
+      loading_unloading: 100,
+      broker_percent: 2,
+      toll_tax: toll_tax ? Number(toll_tax) : 0,
+      transport_rate_per_km_per_ton: 10,
+      source_contact_number: 'N/A',
+    };
+  };
+
+  const formatLogisticsResult = (data) => {
+    const c = data.cost_breakdown || {};
+    const m = data.market_comparison || {};
+
+    return [
+      `🚚 Logistics Report for ${data.crop_name}`,
+      ``,
+      `Source: ${data.source_market}`,
+      `Destination: ${data.destination_market}`,
+      `Quantity: ${data.quantity_kg} kg`,
+      `Distance: ${c.distance_km} km (${c.distance_source})`,
+      ``,
+      `Base Cost: ₹${c.base_cost}`,
+      `Transport Cost: ₹${c.transport_cost}`,
+      `Loading/Unloading: ₹${c.loading_unloading}`,
+      `Broker Commission: ₹${c.broker_commission}`,
+      `Toll/Tax: ₹${c.toll_tax}`,
+      `Total Cost: ₹${c.total_cost}`,
+      `Final Cost per Kg: ₹${c.final_cost_per_kg}`,
+      ``,
+      `Selling Price: ₹${m.destination_price_per_kg}/kg`,
+      `Revenue: ₹${m.total_revenue}`,
+      `Result: ${m.status.toUpperCase()} of ₹${m.profit_loss_rs} (${m.profit_loss_percent}%)`,
+    ].join('\n');
+  };
+
   // ── Main send handler ────────────────────────────────────────────────────
   const handleSendMessage = async (textToSend = inputValue) => {
     const text = textToSend.trim();
@@ -201,6 +260,31 @@ export default function App() {
       } catch (err) { console.error('createConversation:', err); }
     }
     if (activeConvId) await saveMessageToDb(activeConvId, 'user', text);
+
+    const logisticsPayload = parseLogisticsCommand(text);
+    if (logisticsPayload) {
+      if (logisticsPayload.error) {
+        const errorMsg = { role: 'assistant', content: logisticsPayload.error, sources: [] };
+        setMessages([...updatedMessages, errorMsg]);
+        if (activeConvId) await saveMessageToDb(activeConvId, 'assistant', errorMsg.content, []);
+        return;
+      }
+
+      const result = await calculateLogistics(logisticsPayload);
+
+      if (result?.error) {
+        const errorMsg = { role: 'assistant', content: `Logistics error: ${result.error}`, sources: [] };
+        setMessages([...updatedMessages, errorMsg]);
+        if (activeConvId) await saveMessageToDb(activeConvId, 'assistant', errorMsg.content, []);
+        return;
+      }
+
+      const formatted = formatLogisticsResult(result);
+      const aiMsg = { role: 'assistant', content: formatted, sources: [] };
+      setMessages([...updatedMessages, aiMsg]);
+      if (activeConvId) await saveMessageToDb(activeConvId, 'assistant', formatted, []);
+      return;
+    }
 
     // Stream
     let aiResponse = '';
