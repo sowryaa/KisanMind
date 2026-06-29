@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
+import { MapPin,
   User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles,
   MessageSquare, BarChart2, Menu, X, Search,
 } from 'lucide-react';
-import { translate } from '../lib/translate';
+import { MapPin, translate } from '../lib/translate';
 
 const LIMIT_DAY = 1400;
 
@@ -83,6 +83,7 @@ export default function Sidebar({
   onNewChat,
   onShowWeather,
   onShowPrices,
+  onUseMyLocation,
   language = 'te',
   usedToday = 0,
 }) {
@@ -148,6 +149,9 @@ export default function Sidebar({
         <div className="flex flex-col gap-1">
           <label className="text-xs text-gray-400 ml-1">District</label>
           <DistrictSelector district={district} onChangeDistrict={onChangeDistrict} />
+          <button onClick={onUseMyLocation} className="mt-1 w-full flex items-center justify-center gap-1.5 text-xs text-green-400 hover:text-green-300 py-1.5 px-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-colors">
+            <MapPin size={12} /> Use my exact location
+          </button>
         </div>
 
         <div className="flex flex-col gap-2">

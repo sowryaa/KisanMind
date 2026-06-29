@@ -293,6 +293,17 @@ export default function App() {
 
   // ── Weather / Prices ─────────────────────────────────────────────────────
   const handleShowWeather = async () => { setWeatherInfo({ loading: true }); setWeatherInfo(await getWeather(district)); };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) return alert("Geolocation not supported");
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+      const data = await res.json();
+      const place = data.address.village || data.address.town || data.address.city || data.address.county || district;
+      setDistrict(place);
+    }, () => alert("Location access denied"));
+  };
   const handleShowPrices  = async () => { setPriceInfo({ loading: true }); setPriceInfo(await getPrices()); };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -311,6 +322,7 @@ export default function App() {
         onSelectConversation={(id) => { setCurrentConversationId(id); loadMessages(id); }}
         onNewChat={() => { setCurrentConversationId(null); setMessages([]); }}
         onShowWeather={handleShowWeather}
+        onUseMyLocation={handleUseMyLocation}
         onShowPrices={handleShowPrices}
         language={language}
         usedToday={usedToday}
