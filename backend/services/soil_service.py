@@ -66,6 +66,9 @@ async def get_soil_data(lat: float, lon: float) -> dict:
                     if value is not None and unit_factor:
                         soil[name] = round(value / unit_factor, 2)
             
+            # If all values are null, return None to trigger fallback
+            if not any(v is not None for v in soil.values()):
+                return None
             return soil
     except Exception as e:
         logger.error(f"SoilGrids API error: {e}")
