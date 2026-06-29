@@ -150,6 +150,24 @@ export default function App() {
     } catch (err) { console.error('saveMessage:', err); }
   };
 
+  // ── Image analysis handler ────────────────────────────────────────────────
+  const handleImageUpload = async (base64, filename) => {
+    const userMsg = { role: "user", content: `📷 పంట ఫోటో విశ్లేషణ కోసం పంపాను: ${filename}` };
+    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [...prev, { role: "assistant", content: "🔍 మీ పంట ఫోటోను విశ్లేషిస్తున్నాను..." }]);
+    try {
+      const res = await fetch(`https://kisanmind-production.up.railway.app/api/chat/analyze-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_base64: base64, language, user_id: user?.google_id }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: data.analysis || "విశ్లేషణ విఫలమైంది." }]);
+    } catch (err) {
+      setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: "చిత్రం విశ్లేషించడంలో సమస్య ఏర్పడింది." }]);
+    }
+  };
+
   // ── Main send handler ────────────────────────────────────────────────────
   const handleSendMessage = async (textToSend = inputValue) => {
     const text = textToSend.trim();
@@ -339,6 +357,7 @@ export default function App() {
           isStreaming={isStreaming}
           onStop={stopStream}
           onStartVoice={() => { setIsVoiceOpen(true); startListening(); }}
+          onImageUpload={handleImageUpload}
           isRateLimited={!!rateLimitInfo}
           language={language}
         />
