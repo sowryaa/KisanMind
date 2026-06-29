@@ -162,7 +162,7 @@ export default function Sidebar({
             <span className="text-sm">{translate('weather', language)}</span>
           </button>
           <button onClick={onShowFarmProfile} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
-            <Tractor size={17} className="text-green-400" />
+            <MapPin size={17} className="text-green-400" />
             <span className="text-sm">My Farm Profile</span>
           </button>
           <button onClick={onShowSoilAnalysis} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
