@@ -84,6 +84,7 @@ export default function Sidebar({
   onShowWeather,
   onShowPrices,
   onShowSoilAnalysis,
+  onShowFarmProfile,
   onUseMyLocation,
   language = 'te',
   usedToday = 0,
@@ -159,6 +160,10 @@ export default function Sidebar({
           <button onClick={onShowWeather} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
             <CloudSun size={17} className="text-yellow-500" />
             <span className="text-sm">{translate('weather', language)}</span>
+          </button>
+          <button onClick={onShowFarmProfile} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
+            <Tractor size={17} className="text-green-400" />
+            <span className="text-sm">My Farm Profile</span>
           </button>
           <button onClick={onShowSoilAnalysis} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
             <FlaskConical size={17} className="text-orange-400" />

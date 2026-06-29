@@ -6,6 +6,7 @@ import VoiceModal from './components/VoiceModal';
 import RateLimitBanner from './components/RateLimitBanner';
 import { useVoice } from './hooks/useVoice';
 import { useStream } from './hooks/useStream';
+import FarmProfile from "./components/FarmProfile";
 import { useOffline } from './hooks/useOffline';
 import { supabase } from './lib/supabase';
 import { getWeather, getPrices } from './lib/api';
@@ -55,6 +56,7 @@ export default function App() {
   const [rateLimitInfo, setRateLimitInfo]           = useState(null); // {type, reset_at, ...}
 
   // Weather / prices overlays
+  const [showFarmProfile, setShowFarmProfile] = useState(false);
   const [weatherInfo, setWeatherInfo]               = useState(null);
   const [priceInfo, setPriceInfo]                   = useState(null);
 
@@ -339,6 +341,7 @@ export default function App() {
         onNewChat={() => { setCurrentConversationId(null); setMessages([]); }}
         onShowWeather={handleShowWeather}
         onShowSoilAnalysis={() => document.getElementById("soil-upload").click()}
+        onShowFarmProfile={() => setShowFarmProfile(true)}
         onUseMyLocation={handleUseMyLocation}
         onShowPrices={handleShowPrices}
         language={language}
@@ -402,6 +405,10 @@ export default function App() {
       />
 
       {/* Weather overlay */}
+      {showFarmProfile && (
+        <FarmProfile user={user} onClose={() => setShowFarmProfile(false)} onSave={(p) => console.log("Farm saved", p)} />
+      )}
+
       {weatherInfo && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-white/10 p-6 rounded-3xl w-full max-w-lg relative animate-fade-in">
