@@ -186,7 +186,11 @@ async def get_location_farm_data(place: str) -> str:
     
     output = [f"📍 Location: {location_name} ({lat:.2f}°N, {lon:.2f}°E)\n"]
     
-    # Soil data
+    # Soil data — use district fallback if ISRIC returns null
+    if not soil_raw:
+        soil_raw = get_district_soil_fallback(place)
+        if soil_raw:
+            soil_raw["source"] = "icar_fallback"
     if soil_raw:
         soil = interpret_soil(soil_raw)
         output.append("🌱 SOIL DATA (ISRIC SoilGrids — 0-5cm depth):")
