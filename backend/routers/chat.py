@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Request
+from pydantic import BaseModel
+from typing import Optional
 from fastapi.responses import StreamingResponse, JSONResponse
 from services.claude_service import stream_chat
 from services.rate_limiter import check_rate_limit
