@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Send, Mic, Square } from 'lucide-react';
+import { Send, Mic, Square, Camera } from 'lucide-react';
 import { translate } from '../lib/translate';
 
 export default function InputBar({
@@ -9,18 +9,19 @@ export default function InputBar({
   isStreaming,
   onStop,
   onStartVoice,
+  onImageUpload,
   isRateLimited = false,
   language = 'te',
 }) {
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  // Auto-resize textarea: shrink/grow up to 5 lines
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
     const lineHeight = 22;
-    const maxHeight  = lineHeight * 5 + 24; // 5 lines + padding
+    const maxHeight  = lineHeight * 5 + 24;
     ta.style.height  = Math.min(ta.scrollHeight, maxHeight) + 'px';
     ta.style.overflowY = ta.scrollHeight > maxHeight ? 'auto' : 'hidden';
   }, [inputValue]);
@@ -30,6 +31,18 @@ export default function InputBar({
       e.preventDefault();
       if (!isRateLimited && inputValue.trim()) onSubmit();
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      if (onImageUpload) onImageUpload(base64, file.name);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const canSend = !isStreaming && !isRateLimited && !!inputValue.trim();
@@ -52,6 +65,24 @@ export default function InputBar({
         >
           <Mic size={17} />
         </button>
+
+        {/* Camera / image upload button */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isRateLimited}
+          className="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-gray-300 hover:text-farmGreen transition-colors flex items-center justify-center cursor-pointer shrink-0 self-end mb-0.5"
+          title="Upload crop photo for analysis"
+        >
+          <Camera size={17} />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageChange}
+        />
 
         {/* Auto-resizing textarea */}
         <textarea
