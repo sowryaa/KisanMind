@@ -57,7 +57,7 @@ async def chat_stream(req: ChatRequest, request: Request):
     # Weather extraction & injection
     weather_context = ""
     is_weather_query = any(w in last_user_msg.lower() for w in ["weather", "temperature", "temp", "forecast", "rain", "వాతావరణ", "ఉష్ణోగ్రత", "मौसम", "तापमान"])
-    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి"])
+    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి", "నేల", "soil type", "soil health", "మట్టి రకం", "నేల స్థితి"])
     
     if is_weather_query:
         location = extract_location_from_message(last_user_msg)
@@ -70,6 +70,12 @@ async def chat_stream(req: ChatRequest, request: Request):
     
     if is_soil_query and not weather_context:
         location = extract_location_from_message(last_user_msg)
+        # Also try to find village/place names directly
+        if not location:
+            import re
+            village_match = re.search(r"(?:in|at|near|లో|వద్ద)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)", last_user_msg, re.IGNORECASE)
+            if village_match:
+                location = village_match.group(1).strip()
         target_location = location or req.district or "Kurnool"
         try:
             weather_context = await get_location_farm_data(target_location)
@@ -121,7 +127,7 @@ async def chat_incognito(req: ChatRequest, request: Request):
     # Weather extraction & injection
     weather_context = ""
     is_weather_query = any(w in last_user_msg.lower() for w in ["weather", "temperature", "temp", "forecast", "rain", "వాతావరణ", "ఉష్ణోగ్రత", "मौसम", "तापमान"])
-    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి"])
+    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి", "నేల", "soil type", "soil health", "మట్టి రకం", "నేల స్థితి"])
     
     if is_weather_query:
         location = extract_location_from_message(last_user_msg)
@@ -134,6 +140,12 @@ async def chat_incognito(req: ChatRequest, request: Request):
     
     if is_soil_query and not weather_context:
         location = extract_location_from_message(last_user_msg)
+        # Also try to find village/place names directly
+        if not location:
+            import re
+            village_match = re.search(r"(?:in|at|near|లో|వద్ద)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)", last_user_msg, re.IGNORECASE)
+            if village_match:
+                location = village_match.group(1).strip()
         target_location = location or req.district or "Kurnool"
         try:
             weather_context = await get_location_farm_data(target_location)
