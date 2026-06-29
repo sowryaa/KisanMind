@@ -174,6 +174,10 @@ export default function Sidebar({
             <IndianRupee size={17} className="text-green-500" />
             <span className="text-sm">{translate('mandi_prices', language)}</span>
           </button>
+          <button onClick={onShowSchemes} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all">
+            <FileText size={17} className="text-blue-400" />
+            <span className="text-sm">Govt Schemes</span>
+          </button>
         </div>
 
         <div>
