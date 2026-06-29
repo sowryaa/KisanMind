@@ -6,6 +6,7 @@ from services.claude_service import stream_chat
 from services.rate_limiter import check_rate_limit
 from services.key_manager import key_manager
 from services.weather_service import get_weather
+from services.soil_service import get_location_farm_data
 from models.chat import ChatRequest
 import json
 import re
@@ -56,6 +57,7 @@ async def chat_stream(req: ChatRequest, request: Request):
     # Weather extraction & injection
     weather_context = ""
     is_weather_query = any(w in last_user_msg.lower() for w in ["weather", "temperature", "temp", "forecast", "rain", "వాతావరణ", "ఉష్ణోగ్రత", "मौसम", "तापमान"])
+    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి"])
     
     if is_weather_query:
         location = extract_location_from_message(last_user_msg)
@@ -65,6 +67,15 @@ async def chat_stream(req: ChatRequest, request: Request):
             logger.info(f"☀️ Injected OWM weather context for location: {target_location}")
         except Exception as e:
             logger.error(f"Error fetching weather context for {target_location}: {e}")
+    
+    if is_soil_query and not weather_context:
+        location = extract_location_from_message(last_user_msg)
+        target_location = location or req.district or "Kurnool"
+        try:
+            weather_context = await get_location_farm_data(target_location)
+            logger.info(f"🌱 Injected soil+weather context for: {target_location}")
+        except Exception as e:
+            logger.error(f"Error fetching soil context: {e}")
 
     async def generate():
         sources_sent = False
@@ -110,6 +121,7 @@ async def chat_incognito(req: ChatRequest, request: Request):
     # Weather extraction & injection
     weather_context = ""
     is_weather_query = any(w in last_user_msg.lower() for w in ["weather", "temperature", "temp", "forecast", "rain", "వాతావరణ", "ఉష్ణోగ్రత", "मौसम", "तापमान"])
+    is_soil_query = any(w in last_user_msg.lower() for w in ["soil", "matti", "మట్టి", "ph", "fertilizer", "ఎరువు", "nitrogen", "నత్రజని", "land", "భూమి"])
     
     if is_weather_query:
         location = extract_location_from_message(last_user_msg)
@@ -119,6 +131,15 @@ async def chat_incognito(req: ChatRequest, request: Request):
             logger.info(f"☀️ Injected OWM weather context for location: {target_location}")
         except Exception as e:
             logger.error(f"Error fetching weather context for {target_location}: {e}")
+    
+    if is_soil_query and not weather_context:
+        location = extract_location_from_message(last_user_msg)
+        target_location = location or req.district or "Kurnool"
+        try:
+            weather_context = await get_location_farm_data(target_location)
+            logger.info(f"🌱 Injected soil+weather context for: {target_location}")
+        except Exception as e:
+            logger.error(f"Error fetching soil context: {e}")
 
     async def generate():
         async for payload in stream_chat(messages, req.language, weather_context=weather_context):
