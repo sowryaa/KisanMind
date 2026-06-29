@@ -24,3 +24,4 @@ app.include_router(schemes.router, prefix="/api/schemes", tags=["schemes"])
 
 @app.get("/health")
 def health(): return {"status": "ok", "service": "KisanMind API"}
+# force rebuild Mon Jun 29 12:00:24 IST 2026
