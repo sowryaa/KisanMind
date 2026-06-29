@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import InputBar from './components/InputBar';
 import VoiceModal from './components/VoiceModal';
+import SchemeChecker from './components/SchemeChecker';
 import RateLimitBanner from './components/RateLimitBanner';
 import { useVoice } from './hooks/useVoice';
 import { useStream } from './hooks/useStream';
@@ -59,6 +60,7 @@ export default function App() {
   const [showFarmProfile, setShowFarmProfile] = useState(false);
   const [weatherInfo, setWeatherInfo]               = useState(null);
   const [priceInfo, setPriceInfo]                   = useState(null);
+  const [showSchemes, setShowSchemes]               = useState(false);
 
   const isOffline = useOffline();
   const { isStreaming, startStream, stopStream } = useStream();
@@ -344,6 +346,7 @@ export default function App() {
         onShowFarmProfile={() => setShowFarmProfile(true)}
         onUseMyLocation={handleUseMyLocation}
         onShowPrices={handleShowPrices}
+          onShowSchemes={() => setShowSchemes(true)}
         language={language}
         usedToday={usedToday}
       />
@@ -395,6 +398,7 @@ export default function App() {
         />
       </div>
 
+      {showSchemes && <SchemeChecker onClose={() => setShowSchemes(false)} />}
       <VoiceModal
         isOpen={isVoiceOpen}
         onClose={() => { setIsVoiceOpen(false); stopListening(); }}

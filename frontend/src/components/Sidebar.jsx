@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin,
   User, LogOut, CloudSun, IndianRupee, ShieldAlert, Sparkles, FlaskConical,
-  MessageSquare, BarChart2, Menu, X, Search,
+  MessageSquare, BarChart2, Menu, X, Search, FileText,
 } from 'lucide-react';
 import { translate } from '../lib/translate';
 
@@ -83,6 +83,7 @@ export default function Sidebar({
   onNewChat,
   onShowWeather,
   onShowPrices,
+  onShowSchemes,
   onShowSoilAnalysis,
   onShowFarmProfile,
   onUseMyLocation,
